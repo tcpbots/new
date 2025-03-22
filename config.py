@@ -2,24 +2,24 @@
 import os
 
 # Telegram Bot API credentials (Replace these with real values)
-API_ID = "YOUR_API_ID"  # Get from my.telegram.org
-API_HASH = "YOUR_API_HASH"  # Get from my.telegram.org
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # Get from BotFather
+API_ID = "17760082"  # Get from my.telegram.org
+API_HASH = "c3fc3cd44886967cf3c0e8585b5cad1c"  # Get from my.telegram.org
+BOT_TOKEN = "7728132142:AAGk_57f_5laLd0CuQbcsrdqavdtsWBd0cU"  # Get from BotFather
 
 # Bot configuration
 DOWNLOAD_DIR = "downloads"
 MAX_CONCURRENT_DOWNLOADS = 5
 
 # Admin settings (Add your Telegram user IDs)
-ADMIN_IDS = {123456789, 987654321}  # Multiple admin Telegram user IDs
+ADMIN_IDS = {6116993643, 1809710185}  # Multiple admin Telegram user IDs
 
 # Channels (Replace with your channel usernames and IDs)
 FORCE_CHANNELS = [
-    "@YourChannelUsername1",
-    "@YourChannelUsername2"
+    "@tcp_bots",
+    "@ds_bots"
 ]
-LOGS_CHANNEL_ID = -1001234567890  # Numeric ID of logs channel
-UPDATES_CHANNEL = "@YourUpdatesChannel"
+LOGS_CHANNEL_ID = -1002667837026  # Numeric ID of logs channel
+UPDATES_CHANNEL = "@tcp_bots"
 
 # Supported platforms
 SUPPORTED_PLATFORMS = [
@@ -28,7 +28,7 @@ SUPPORTED_PLATFORMS = [
 ]
 
 # MongoDB configuration
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = "mongodb+srv://Shivayfile:jub9vtXuBrJYkw8e@databasefiletolink.k2rei.mongodb.net/?retryWrites=true&w=majority"
 DB_NAME = "telegram_bot"
 
 # YouTube Premium account (optional; leave blank if not used)
