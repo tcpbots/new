@@ -1,6 +1,6 @@
 # utils.py
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from config import LOG_CHANNEL  # Assuming LOG_CHANNEL is defined in config.py
+from config import LOGS_CHANNEL_ID  # Use numeric ID instead of username
 
 async def log_to_channel(context, message, file_path=None):
     """
@@ -10,9 +10,9 @@ async def log_to_channel(context, message, file_path=None):
     try:
         if file_path:
             with open(file_path, 'rb') as f:
-                await context.bot.send_document(LOG_CHANNEL, f, caption=message)
+                await context.bot.send_document(LOGS_CHANNEL_ID, f, caption=message)
         else:
-            await context.bot.send_message(LOG_CHANNEL, message)
+            await context.bot.send_message(LOGS_CHANNEL_ID, message)
     except Exception as e:
         print(f"Failed to log to channel: {str(e)}")
 
