@@ -19,15 +19,16 @@ FORCE_CHANNELS = [
     "@ds_bots"
 ]
 LOGS_CHANNEL_ID = -1002667837026  # Numeric ID of logs channel
+LOG_CHANNEL = "@tcp_bots_logs"  # Added for log_to_channel function (replace with your actual log channel username)
 UPDATES_CHANNEL = "@tcp_bots"
 
-# Supported platforms
+# Supported platforms (Updated to include more URL formats)
 SUPPORTED_PLATFORMS = [
     "youtube", "vimeo", "dailymotion", "instagram", "x.com", "twitter.com",
-    "facebook.com", "tiktok.com"
+    "facebook.com", "tiktok.com", "youtu.be", "fb.watch"
 ]
 
-# MongoDB configuration
+# MongoDB configuration (Optional; currently using in-memory storage in database.py)
 MONGO_URI = "mongodb+srv://Shivayfile:jub9vtXuBrJYkw8e@databasefiletolink.k2rei.mongodb.net/?retryWrites=true&w=majority"
 DB_NAME = "telegram_bot"
 
