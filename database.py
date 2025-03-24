@@ -1,82 +1,156 @@
 # database.py
-from collections import defaultdict
-import time
+from pymongo import MongoClient
+from config import MONGO_URI, MONGO_DB_NAME
 
-# In-memory storage (replace with SQLite/MongoDB for persistence)
-users_data = {}
-stats_data = defaultdict(list)
+# Initialize MongoDB client
+client = MongoClient(MONGO_URI)
+db = client[MONGO_DB_NAME]
+
+# Collections
+users_collection = db["users"]
+stats_collection = db["stats"]
+banned_users_collection = db["banned_users"]
+thumbnails_collection = db["thumbnails"]
+
+# Initialize stats if not present
+if stats_collection.count_documents({}) == 0:
+    stats_collection.insert_one({
+        "total_videos": 0,
+        "total_size": 0.0,
+        "total_time": 0.0,
+        "global_task_limit": 2
+    })
 
 def get_user_data(user_id):
     """
-    Retrieve user data. If user doesn't exist, return default settings.
+    Get user data from MongoDB, initializing with defaults if not present.
     """
-    if user_id not in users_data:
-        users_data[user_id] = {
-            "language": "en",
-            "default_quality": None,
+    user = users_collection.find_one({"user_id": user_id})
+    if not user:
+        default_data = {
+            "user_id": user_id,
+            "default_quality": "best",
+            "compression": False,
             "audio_only": False,
-            "upload_format": "MP4",
-            "edit_metadata": False,
-            "compression": False,  # New setting: compression disabled by default
-            "last_active": time.time()
+            "upload_format": "mp4",
+            "metadata_edit": False,
+            "file_rename": False,
+            "multi_audio": False,
+            "subtitles": False,
+            "active_downloads": 0
         }
-    return users_data[user_id]
+        users_collection.insert_one(default_data)
+        return default_data
+    return user
 
 def update_user_data(user_id, data):
     """
-    Update user data with new settings.
+    Update user data in MongoDB.
     """
-    if user_id not in users_data:
-        users_data[user_id] = {
-            "language": "en",
-            "default_quality": None,
-            "audio_only": False,
-            "upload_format": "MP4",
-            "edit_metadata": False,
-            "compression": False,  # New setting
-            "last_active": time.time()
-        }
-    users_data[user_id].update(data)
-    users_data[user_id]["last_active"] = time.time()
+    users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": data},
+        upsert=True
+    )
 
-def log_stat(user_id, size_mb, duration):
+def log_stat(user_id, size_mb, time_taken):
     """
-    Log statistics for a download.
+    Log download statistics in MongoDB.
     """
-    stats_data[user_id].append({
-        "size_mb": size_mb,
-        "duration": duration,
-        "timestamp": time.time()
-    })
-
-def get_total_users():
-    """
-    Return the total number of unique users.
-    """
-    return len(users_data)
-
-def get_user_activity(user_id):
-    """
-    Return user activity: number of videos, total size, and last active time.
-    """
-    if user_id not in stats_data:
-        return 0, 0.0, users_data.get(user_id, {}).get("last_active", 0)
-    videos = len(stats_data[user_id])
-    total_size = sum(stat["size_mb"] for stat in stats_data[user_id])
-    last_active = users_data.get(user_id, {}).get("last_active", 0)
-    return videos, total_size, last_active
+    stats_collection.update_one(
+        {},
+        {
+            "$inc": {
+                "total_videos": 1,
+                "total_size": size_mb,
+                "total_time": time_taken
+            }
+        },
+        upsert=True
+    )
 
 def get_bot_stats():
     """
-    Return overall bot statistics: total videos, total size, total time.
+    Get bot statistics from MongoDB.
     """
-    total_videos = sum(len(stats) for stats in stats_data.values())
-    total_size = sum(stat["size_mb"] for stats in stats_data.values() for stat in stats)
-    total_time = sum(stat["duration"] for stats in stats_data.values() for stat in stats)
-    return {"total_videos": total_videos, "total_size": total_size, "total_time": total_time}
+    stats = stats_collection.find_one({})
+    if not stats:
+        return {"total_videos": 0, "total_size": 0.0, "total_time": 0.0}
+    return {
+        "total_videos": stats.get("total_videos", 0),
+        "total_size": stats.get("total_size", 0.0),
+        "total_time": stats.get("total_time", 0.0)
+    }
 
-def get_all_user_ids():
+def get_total_users():
     """
-    Return a list of all user IDs.
+    Get total number of users from MongoDB.
     """
-    return list(users_data.keys())
+    return users_collection.count_documents({})
+
+def ban_user(user_id):
+    """
+    Ban a user by adding them to the banned_users collection.
+    """
+    banned_users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {"user_id": user_id}},
+        upsert=True
+    )
+
+def unban_user(user_id):
+    """
+    Unban a user by removing them from the banned_users collection.
+    """
+    banned_users_collection.delete_one({"user_id": user_id})
+
+def is_banned(user_id):
+    """
+    Check if a user is banned.
+    """
+    return banned_users_collection.find_one({"user_id": user_id}) is not None
+
+def set_task_limit(limit):
+    """
+    Set the global task limit for concurrent downloads in MongoDB.
+    """
+    stats_collection.update_one(
+        {},
+        {"$set": {"global_task_limit": limit}},
+        upsert=True
+    )
+
+def get_task_limit():
+    """
+    Get the global task limit from MongoDB.
+    """
+    stats = stats_collection.find_one({})
+    return stats.get("global_task_limit", 2) if stats else 2
+
+def set_thumbnail(user_id, thumbnail_path):
+    """
+    Set a custom thumbnail for a user in MongoDB.
+    """
+    thumbnails_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {"user_id": user_id, "thumbnail_path": thumbnail_path}},
+        upsert=True
+    )
+
+def get_thumbnail(user_id):
+    """
+    Get the custom thumbnail for a user from MongoDB.
+    """
+    thumbnail = thumbnails_collection.find_one({"user_id": user_id})
+    return thumbnail.get("thumbnail_path") if thumbnail else None
+
+def delete_thumbnail(user_id):
+    """
+    Delete the custom thumbnail for a user from MongoDB and the filesystem.
+    """
+    thumbnail = thumbnails_collection.find_one({"user_id": user_id})
+    if thumbnail:
+        path = thumbnail.get("thumbnail_path")
+        if path and os.path.exists(path):
+            os.remove(path)
+        thumbnails_collection.delete_one({"user_id": user_id})
