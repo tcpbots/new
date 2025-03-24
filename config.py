@@ -1,41 +1,50 @@
 # config.py
 import os
 
-# Telegram Bot API credentials (Replace these with real values)
-API_ID = "17760082"  # Get from my.telegram.org
-API_HASH = "c3fc3cd44886967cf3c0e8585b5cad1c"  # Get from my.telegram.org
-BOT_TOKEN = "7728132142:AAGk_57f_5laLd0CuQbcsrdqavdtsWBd0cU"  # Get from BotFather
+# Bot token from BotFather (required for python-telegram-bot)
+BOT_TOKEN = "7728132142:AAGk_57f_5laLd0CuQbcsrdqavdtsWBd0cU"  # Replace with your bot token
 
-# Bot configuration
-DOWNLOAD_DIR = "downloads"
-MAX_CONCURRENT_DOWNLOADS = 5
+# API ID and API Hash (not required for python-telegram-bot, but included for potential use with pyrogram/telethon)
+API_ID = 17760082   # Replace with your API ID (get from my.telegram.org)
+API_HASH = "c3fc3cd44886967cf3c0e8585b5cad1c"  # Replace with your API Hash (get from my.telegram.org)
 
-# Admin settings (Add your Telegram user IDs)
-ADMIN_IDS = {6116993643, 1809710185}  # Multiple admin Telegram user IDs
+# MongoDB connection details
+MONGO_URI = "mongodb+srv://Shivayfile:jub9vtXuBrJYkw8e@databasefiletolink.k2rei.mongodb.net/?retryWrites=true&w=majority
+"  # Replace with your MongoDB URI (e.g., mongodb+srv://user:pass@cluster0.mongodb.net/)
+MONGO_DB_NAME = "video_downloader_bot"  # Database name for the bot
 
-# Channels (Replace with your channel usernames and IDs)
-FORCE_CHANNELS = [
-    "@tcp_bots",
-    "@ds_bots"
-]
-LOGS_CHANNEL_ID = -1002667837026  # Numeric ID of logs channel
-LOG_CHANNEL = "@tcp_bots_logs"  # Added for log_to_channel function (replace with your actual log channel username)
-UPDATES_CHANNEL = "@tcp_bots"
-
-# Supported platforms (Updated to include more URL formats)
+# List of supported platforms for video downloads
 SUPPORTED_PLATFORMS = [
-    "youtube", "vimeo", "dailymotion", "instagram", "x.com", "twitter.com",
-    "facebook.com", "tiktok.com", "youtu.be", "fb.watch"
+    "youtube", "instagram", "tiktok", "facebook", "twitter", "x.com",
+    "vimeo", "dailymotion", "reddit", "pinterest", "soundcloud"
 ]
 
-# MongoDB configuration (Optional; currently using in-memory storage in database.py)
-MONGO_URI = "mongodb+srv://Shivayfile:jub9vtXuBrJYkw8e@databasefiletolink.k2rei.mongodb.net/?retryWrites=true&w=majority"
-DB_NAME = "telegram_bot"
+# Channels users must join to use the bot (forced subscriptions)
+FORCE_CHANNELS = ["@tcp_bots", "@ds_bots"]  # Replace with your channel usernames
 
-# YouTube Premium account (optional; leave blank if not used)
-YOUTUBE_PREMIUM_USERNAME = "your_youtube_email@example.com"
-YOUTUBE_PREMIUM_PASSWORD = "your_youtube_password"
+# Channel ID for logging bot activities (e.g., errors, downloads, restarts)
+LOGS_CHANNEL_ID = -1002667837026  # Replace with your logs channel ID
 
-# Ensure download directory exists
+# List of admin user IDs who can access admin commands
+ADMIN_IDS = [1809710185, 6116993643]  # Replace with admin user IDs
+
+# Directory to store downloaded files temporarily
+DOWNLOAD_DIR = "downloads"
+
+# Default maximum number of concurrent downloads per user
+DEFAULT_TASK_LIMIT = 2
+
+# Optional: Credentials for premium accounts (e.g., YouTube Premium, Facebook)
+YOUTUBE_PREMIUM_USERNAME = None  # Replace with username if needed
+YOUTUBE_PREMIUM_PASSWORD = None  # Replace with password if needed
+
+# Maximum file size allowed by Telegram (in bytes)
+# Telegram's limit for bots is 2000 MB (2 GB)
+MAX_FILE_SIZE = 2000 * 1024 * 1024  # 2000 MB in bytes
+
+# Supported upload formats
+SUPPORTED_UPLOAD_FORMATS = ["mp4", "mkv", "webm"]
+
+# Create the downloads directory if it doesn't exist
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
